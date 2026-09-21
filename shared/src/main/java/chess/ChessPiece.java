@@ -72,39 +72,56 @@ public class ChessPiece {
 
 
 
-    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        Collection<ChessMove> moves= new ArrayList<>();
-        if (type== PieceType.ROOK){
-            int[][] directions ={
-                    {1,0},
-                    {-1,0},
-                    {0,1},
-                    {0,-1}
-            };//rook closing braket//
-            for (int[] direction: directions){
-                int row=myPosition.getRow()+ direction[0];
-                int col=myPosition.getColumn()+direction[1];
+    public Collection<ChessMove> pieceMoves(
+            ChessBoard board,
+            ChessPosition myPosition
+    ) {
+        Collection<ChessMove> moves = new ArrayList<>();
 
-                while(row>=1 && row<=8 &&col>=1 && col<=8){
-                    ChessPosition destination=new ChessPosition(row,col);
-                    ChessPiece pieceAtDestination= board.getPiece(destination);
-
-                    if (pieceAtDestination==null){
-                        moves.add(new ChessMove(myPosition, destination,null));
-                    }else{
-                        if (pieceAtDestination.getTeamColor() !=pieceColor){
-                            moves.add(new ChessMove(myPosition,destination,null));
-                        }
-                        break;
-                    }
-
-                    row+=direction[0];
-                    col+=direction[1];
-
-                }
+        switch (type) {
+            case ROOK -> {
+                int[][] directions = {
+                        {1, 0}, {-1, 0}, {0, 1}, {0, -1}
+                };
+                addSlidingMoves(board, myPosition, moves, directions);
             }
+
+            case BISHOP -> {
+                int[][] directions = {
+                        {1, 1}, {1, -1}, {-1, 1}, {-1, -1}
+                };
+                addSlidingMoves(board, myPosition, moves, directions);
+            }
+
+            case QUEEN -> {
+                int[][] directions = {
+                        {1, 0}, {-1, 0}, {0, 1}, {0, -1},
+                        {1, 1}, {1, -1}, {-1, 1}, {-1, -1}
+                };
+                addSlidingMoves(board, myPosition, moves, directions);
+            }
+
+            case KNIGHT -> {
+                int[][] jumps = {
+                        {2, 1}, {2, -1}, {-2, 1}, {-2, -1},
+                        {1, 2}, {1, -2}, {-1, 2}, {-1, -2}
+                };
+                addSingleStepMoves(board, myPosition, moves, jumps);
+            }
+
+            case KING -> {
+                int[][] directions = {
+                        {1, 0}, {-1, 0}, {0, 1}, {0, -1},
+                        {1, 1}, {1, -1}, {-1, 1}, {-1, -1}
+                };
+                addSingleStepMoves(board, myPosition, moves, directions);
+            }
+
+            case PAWN -> addPawnMoves(board, myPosition, moves);
         }
+
         return moves;
+    }
     }
 
 }
