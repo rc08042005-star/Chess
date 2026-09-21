@@ -122,6 +122,36 @@ public class ChessPiece {
 
         return moves;
     }
+    private void addSlidingMoves(
+            ChessBoard board,
+            ChessPosition start,
+            Collection<ChessMove> moves,
+            int[][] directions
+    ) {
+        for (int[] direction : directions) {
+            int row = start.getRow() + direction[0];
+            int col = start.getColumn() + direction[1];
+
+            while (isOnBoard(row, col)) {
+                ChessPosition destination = new ChessPosition(row, col);
+                ChessPiece occupyingPiece = board.getPiece(destination);
+
+                if (occupyingPiece == null) {
+                    moves.add(new ChessMove(start, destination, null));
+                } else {
+                    if (occupyingPiece.getTeamColor() != pieceColor) {
+                        moves.add(new ChessMove(start, destination, null));
+                    }
+
+                    // Cannot move through another piece.
+                    break;
+                }
+
+                row += direction[0];
+                col += direction[1];
+            }
+        }
+    }
     }
 
 }
