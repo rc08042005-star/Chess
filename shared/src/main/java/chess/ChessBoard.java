@@ -1,5 +1,5 @@
 package chess;
-
+import java.util.Arrays;
 /**
  * A chessboard that can hold and rearrange chess pieces.
  * <p>
@@ -45,7 +45,7 @@ public class ChessBoard {
         for(int row=0;row<8;row++){
             for(int col=0;col<8;col++){
                 squares[row][col]=null;
-      ;      }
+            }
         }
         // pawn placement
         for (int col=1; col<=8;col++){
@@ -53,7 +53,7 @@ public class ChessBoard {
             new ChessPiece(ChessGame.TeamColor.WHITE,ChessPiece.PieceType.PAWN));
 
             addPiece(new ChessPosition(7,col),
-                    new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
+                    new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
         }
         //placing the other piece in their starting position.
         ChessPiece.PieceType[] backRow={
@@ -69,11 +69,26 @@ public class ChessBoard {
         for (int col=1; col<=8;col++){
             ChessPiece.PieceType type =backRow[col-1];
 
-            addPiece(new ChessPosition(1,col),
-                    new ChessPiece((ChessGame.TeamColor.WHITE, type));
-            addPiece(new ChessPosition(8,col),
-                    new ChessPiece(ChessGame.TeamColor.BLACK, type));
-            );
+            addPiece(new ChessPosition(1,col),new ChessPiece(ChessGame.TeamColor.WHITE, type));
+            addPiece(new ChessPosition(8,col), new ChessPiece(ChessGame.TeamColor.BLACK, type));
+
         }
+    }
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof ChessBoard other)) {
+            return false;
+        }
+
+        return Arrays.deepEquals(squares, other.squares);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.deepHashCode(squares);
     }
 }
