@@ -222,5 +222,46 @@ public class ChessPiece {
                 }
             }
         }
+        // Pawns capture diagonally, not straight ahead.
+        int[] captureColumns = {col - 1, col + 1};
+
+        for (int captureCol : captureColumns) {
+            if (!isOnBoard(nextRow, captureCol)) {
+                continue;
+            }
+
+            ChessPosition destination =
+                    new ChessPosition(nextRow, captureCol);
+
+            ChessPiece occupyingPiece = board.getPiece(destination);
+
+            if (occupyingPiece != null
+                    && occupyingPiece.getTeamColor() != pieceColor) {
+                addPawnMove(start, destination, moves, promotionRow);
+            }
+        }
     }
+    private void addPawnMove(
+            ChessPosition start,
+            ChessPosition destination,
+            Collection<ChessMove> moves,
+            int promotionRow
+    ) {
+        if (destination.getRow() == promotionRow) {
+            moves.add(new ChessMove(start, destination, PieceType.QUEEN));
+            moves.add(new ChessMove(start, destination, PieceType.ROOK));
+            moves.add(new ChessMove(start, destination, PieceType.BISHOP));
+            moves.add(new ChessMove(start, destination, PieceType.KNIGHT));
+        } else {
+            moves.add(new ChessMove(start, destination, null));
+        }
+    }
+
+    /**
+     * ChessPosition uses rows and columns numbered 1 through 8.
+     */
+    private boolean isOnBoard(int row, int col) {
+        return row >= 1 && row <= 8 && col >= 1 && col <= 8;
+
+  }
 }
