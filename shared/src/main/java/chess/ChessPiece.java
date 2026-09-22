@@ -152,6 +152,75 @@ public class ChessPiece {
             }
         }
     }
+    private void addSingleStepMoves(
+            ChessBoard board,
+            ChessPosition start,
+            Collection<ChessMove> moves,
+            int[][] offsets
+    ) {
+        for (int[] offset : offsets) {
+            int row = start.getRow() + offset[0];
+            int col = start.getColumn() + offset[1];
+
+            if (!isOnBoard(row, col)) {
+                continue;
+            }
+
+            ChessPosition destination = new ChessPosition(row, col);
+            ChessPiece occupyingPiece = board.getPiece(destination);
+
+            if (occupyingPiece == null
+                    || occupyingPiece.getTeamColor() != pieceColor) {
+                moves.add(new ChessMove(start, destination, null));
+            }
+        }
     }
 
+    /**
+     * Handles pawn forward movement, captures, and promotion.
+     */
+    private void addPawnMoves(
+            ChessBoard board,
+            ChessPosition start,
+            Collection<ChessMove> moves
+    ) {
+        int direction;
+        int startingRow;
+        int promotionRow;
+
+        if (pieceColor == ChessGame.TeamColor.WHITE) {
+            direction = 1;
+            startingRow = 2;
+            promotionRow = 8;
+        } else {
+            direction = -1;
+            startingRow = 7;
+            promotionRow = 1;
+        }
+
+        int row = start.getRow();
+        int col = start.getColumn();
+        int nextRow = row + direction;
+
+        // Move forward one square if it is empty.
+        if (isOnBoard(nextRow, col)) {
+            ChessPosition oneForward = new ChessPosition(nextRow, col);
+
+            if (board.getPiece(oneForward) == null) {
+                addPawnMove(start, oneForward, moves, promotionRow);
+
+                // Move two squares only from the starting row.
+                int twoForwardRow = row + 2 * direction;
+
+                if (row == startingRow && isOnBoard(twoForwardRow, col)) {
+                    ChessPosition twoForward =
+                            new ChessPosition(twoForwardRow, col);
+
+                    if (board.getPiece(twoForward) == null) {
+                        moves.add(new ChessMove(start, twoForward, null));
+                    }
+                }
+            }
+        }
+    }
 }
