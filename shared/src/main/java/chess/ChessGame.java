@@ -77,21 +77,59 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-      ChessPosition kingPosition=null;
-      for (int row=1;row<=8;row++){
-          for (int col=1;col<=8;col++){
-              ChessPosition position=new ChessPosition(row,col);
-              ChessPiece piece=board.getPiece(position);
+        ChessPosition kingPosition = null;
 
-              if (piece!=null && piece.getTeamColor()==teamColor && piece.getPieceType()==ChessPiece.PieceType.KING){
-                  kingPosition=position;
-                  break;
-              }
-          }
-          if (kingPosition!=null){
-              break;
-          }
-      }
+        // Find this team's king
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+
+                ChessPosition position =
+                        new ChessPosition(row, col);
+
+                ChessPiece piece =
+                        board.getPiece(position);
+
+                if (piece != null
+                        && piece.getTeamColor() == teamColor
+                        && piece.getPieceType() == ChessPiece.PieceType.KING) {
+
+                    kingPosition = position;
+                    break;
+                }
+            }
+
+            if (kingPosition != null) {
+                break;
+            }
+        }
+
+        // Look for enemy pieces attacking the king
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+
+                ChessPosition position =
+                        new ChessPosition(row, col);
+
+                ChessPiece piece =
+                        board.getPiece(position);
+
+                if (piece != null
+                        && piece.getTeamColor() != teamColor) {
+
+                    Collection<ChessMove> enemyMoves =
+                            piece.pieceMoves(board, position);
+
+                    for (ChessMove move : enemyMoves) {
+
+                        if (move.getEndPosition().equals(kingPosition)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
