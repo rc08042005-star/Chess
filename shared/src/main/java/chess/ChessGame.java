@@ -4,22 +4,20 @@ import java.util.Collection;
 
 /**
  * A class that can manage a chess game, making moves on a board
+ *
  * <p>
  * Note: You can add to this class, but you may not alter
  * signature of the existing methods.
  */
 public class ChessGame {
+
     private TeamColor teamTurn;
     private ChessBoard board;
 
     public ChessGame() {
-
-        teamTurn= TeamColor.WHITE;
-        board= new ChessBoard();
+        teamTurn = TeamColor.WHITE;
+        board = new ChessBoard();
         board.resetBoard();
-
-
-
     }
 
     /**
@@ -27,8 +25,6 @@ public class ChessGame {
      */
     public TeamColor getTeamTurn() {
         return teamTurn;
-
-
     }
 
     /**
@@ -37,8 +33,7 @@ public class ChessGame {
      * @param team the team whose turn it is
      */
     public void setTeamTurn(TeamColor team) {
-
-       teamTurn=team;
+        teamTurn = team;
     }
 
     /**
@@ -57,7 +52,19 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+
+        ChessPiece piece = board.getPiece(startPosition);
+
+        if (piece == null) {
+            return null;
+        }
+
+        Collection<ChessMove> possibleMoves =
+                piece.pieceMoves(board, startPosition);
+
+        // More filtering will go here later
+
+        return possibleMoves;
     }
 
     /**
@@ -77,6 +84,7 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
+
         ChessPosition kingPosition = null;
 
         // Find this team's king
@@ -143,8 +151,8 @@ public class ChessGame {
     }
 
     /**
-     * Determines if the given team is in stalemate, which here is defined as having
-     * no valid moves while not in check.
+     * Determines if the given team is in stalemate, which here is defined as
+     * having no valid moves while not in check.
      *
      * @param teamColor which team to check for stalemate
      * @return True if the specified team is in stalemate, otherwise false
@@ -159,7 +167,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        this.board=board;
+        this.board = board;
     }
 
     /**
@@ -168,7 +176,6 @@ public class ChessGame {
      * @return the chessboard
      */
     public ChessBoard getBoard() {
-
-      return  board;
+        return board;
     }
 }
