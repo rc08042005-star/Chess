@@ -1,5 +1,5 @@
 package chess;
-
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -62,9 +62,25 @@ public class ChessGame {
         Collection<ChessMove> possibleMoves =
                 piece.pieceMoves(board, startPosition);
 
-        // More filtering will go here later
+        Collection<ChessMove> validMoves = new ArrayList<>();
 
-        return possibleMoves;
+        for (ChessMove move : possibleMoves) {
+
+            ChessPosition endPosition = move.getEndPosition();
+            ChessPiece capturedPiece = board.getPiece(endPosition);
+
+            board.addPiece(endPosition, piece);
+            board.addPiece(startPosition, null);
+
+            if (!isInCheck(piece.getTeamColor())) {
+                validMoves.add(move);
+            }
+
+            board.addPiece(startPosition, piece);
+            board.addPiece(endPosition, capturedPiece);
+        }
+
+        return validMoves;
     }
 
     /**
