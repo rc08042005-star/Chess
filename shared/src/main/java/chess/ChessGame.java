@@ -236,4 +236,25 @@ public class ChessGame {
     public ChessBoard getBoard() {
         return board;
     }
+
+
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof ChessGame other)) {
+            return false;
+        }
+
+        return teamTurn == other.teamTurn
+                && Objects.equals(board, other.board);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(teamTurn, board);
+    }
 }
