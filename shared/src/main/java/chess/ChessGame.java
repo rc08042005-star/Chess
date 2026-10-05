@@ -205,7 +205,34 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+
+        // Checkmate requires the king to currently be in check
+        if (!isInCheck(teamColor)) {
+            return false;
+        }
+
+        // Look at every piece belonging to this team
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+
+                ChessPosition position = new ChessPosition(row, col);
+                ChessPiece piece = board.getPiece(position);
+
+                if (piece != null && piece.getTeamColor() == teamColor) {
+
+                    Collection<ChessMove> moves = validMoves(position);
+
+                    // If even one piece has a valid move,
+                    // the team can escape, so it is not checkmate
+                    if (moves != null && !moves.isEmpty()) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        // In check + no valid moves = checkmate
+        return true;
     }
 
     /**
@@ -216,7 +243,33 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+
+        // Stalemate requires the king NOT to be in check
+        if (isInCheck(teamColor)) {
+            return false;
+        }
+
+        // Look at every piece belonging to this team
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+
+                ChessPosition position = new ChessPosition(row, col);
+                ChessPiece piece = board.getPiece(position);
+
+                if (piece != null && piece.getTeamColor() == teamColor) {
+
+                    Collection<ChessMove> moves = validMoves(position);
+
+                    // If any piece can move, it isn't stalemate
+                    if (moves != null && !moves.isEmpty()) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        // Not in check + no valid moves = stalemate
+        return true;
     }
 
     /**
