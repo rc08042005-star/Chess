@@ -1,5 +1,6 @@
 package chess;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Collection;
 
 /**
@@ -90,7 +91,48 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+
+        ChessPosition startPosition = move.getStartPosition();
+        ChessPosition endPosition = move.getEndPosition();
+
+        ChessPiece piece = board.getPiece(startPosition);
+
+        // There must be a piece at the starting position
+        if (piece == null) {
+            throw new InvalidMoveException();
+        }
+
+        // It must be that piece's team's turn
+        if (piece.getTeamColor() != teamTurn) {
+            throw new InvalidMoveException();
+        }
+
+        // The requested move must be one of the piece's valid moves
+        Collection<ChessMove> validMoves = validMoves(startPosition);
+
+        if (validMoves == null || !validMoves.contains(move)) {
+            throw new InvalidMoveException();
+        }
+
+        // Move the piece
+        board.addPiece(startPosition, null);
+
+        // Handle pawn promotion
+        if (move.getPromotionPiece() != null) {
+            ChessPiece promotedPiece =
+                    new ChessPiece(piece.getTeamColor(), move.getPromotionPiece());
+
+            board.addPiece(endPosition, promotedPiece);
+        } else {
+            board.addPiece(endPosition, piece);
+        }
+
+        // Switch turns
+        if (teamTurn == TeamColor.WHITE) {
+            teamTurn = TeamColor.BLACK;
+        } else {
+            teamTurn = TeamColor.WHITE;
+        }
     }
 
     /**
