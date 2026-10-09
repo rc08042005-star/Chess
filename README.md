@@ -50,3 +50,12 @@ java -jar client/target/client-jar-with-dependencies.jar
 
 ♕ 240 Chess Client: chess.ChessPiece@7852e922
 ```
+Phase 2: Chess Server Design
+
+This phase focuses on designing the chess server using UML sequence diagrams. The diagrams illustrate how the client, server, handlers, services, data access objects, and database communicate.
+
+Sequence Diagrams
+[clear-diagram-text.txt](clear-diagram-text.txt)
+Clear Database: View Sequence Diagram
+
+The remaining endpoints to design are Register, Login, Logout, List Games, Create Game, and Join Game.
