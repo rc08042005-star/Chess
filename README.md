@@ -18,7 +18,7 @@ The application has three modules.
 
 ## Starter Code
 
-As you create your chess application you will move through specific phases of development. This starts with implementing the moves of chess and finishes with sending game moves over the network between your client and server. You will start each phase by copying course provided [starter-code](starter-code/) for that phase into the source code of the project. Do not copy a phases' starter code before you are ready to begin work on that phase.
+As you create your chess application you will move through specific phases of development. This starts with implementing the moves of chess and finishes with sending game moves over the network between your client and server. You will start each phase by copying course provided [starter-code](starter-code/) for that phase into the source code of the project. Do not copy a phase's starter code before you are ready to begin work on that phase.
 
 ## IntelliJ Support
 
@@ -28,16 +28,16 @@ Open the project directory in IntelliJ in order to develop, run, and debug your 
 
 You can use the following commands to build, test, package, and run your code.
 
-| Command                    | Description                                     |
-| -------------------------- | ----------------------------------------------- |
-| `mvn compile`              | Builds the code                                 |
-| `mvn package`              | Run the tests and build an Uber jar file        |
-| `mvn package -DskipTests`  | Build an Uber jar file                          |
-| `mvn install`              | Installs the packages into the local repository |
-| `mvn test`                 | Run all the tests                               |
-| `mvn -pl shared test`      | Run all the shared tests                        |
-| `mvn -pl client exec:java` | Build and run the client `Main`                 |
-| `mvn -pl server exec:java` | Build and run the server `Main`                 |
+| Command | Description |
+| --- | --- |
+| `mvn compile` | Builds the code |
+| `mvn package` | Run the tests and build an Uber jar file |
+| `mvn package -DskipTests` | Build an Uber jar file |
+| `mvn install` | Installs the packages into the local repository |
+| `mvn test` | Run all the tests |
+| `mvn -pl shared test` | Run all the shared tests |
+| `mvn -pl client exec:java` | Build and run the client `Main` |
+| `mvn -pl server exec:java` | Build and run the server `Main` |
 
 These commands are configured by the `pom.xml` (Project Object Model) files. There is a POM file in the root of the project, and one in each of the modules. The root POM defines any global dependencies and references the module POM files.
 
@@ -50,20 +50,25 @@ java -jar client/target/client-jar-with-dependencies.jar
 
 ♕ 240 Chess Client: chess.ChessPiece@7852e922
 ```
-Phase 2: Chess Server Design
 
-#Register endpoint
-https://sequencediagram.org/index.html?presentationMode=readOnly#initialData=FAZwDghgxgpsAuBLeAbGACASjA5ok8MATugKIB2AJmAPaLnzDDTw0kDCKiMDwkRSKIkgN0AZWIA3YnwgDEQkfCy58hIgAkIVNEVnzF25djwFiEopIVx+g4UfQBVEMQAiAQQDy+u0vTuAV3gACw9vWwV7UVcIeAgAIwgXJk5uBgBaAD4LaSIALnQABU8xABV0AHoAlxIACmricggAWxgAGnRIEBAAdzZKDphmiEQUAEpgHOIskzViLR1iAuDtSjRZsyJaohgARwCYAgmN9QW16cyT8ylrAp3TdXqaptaOrt7+weHRieArohy1iyzjcXgKOBg8BBWwaRBeMAm0LCWRicUSLgKADN6JR0LD0PEAJ5454tOCohJJGDpYE1MIFJGxCDoNjocgBFAoYBIrw0y6qTaA2AMulMlkkdmcpgQFDKaHw9AynYQSjEmAADzUIGA6F1Kge10sQJmAtOq10BXcKGVqtKEAA1jxSOrYGAkDRyDq9f8zro+VN8uhiERWTtwB7knrxFJpllUjx4AUNKVSoV0AAWAAMAGZgDAUC4nKTWorJCMUAk0F7df8hdTMjzPAUoMrCNCnm4mRMo42UUz0TACvQaspYdX0BSB3zGwUQAEoLBuuPeyaDQCbsL0HOF4dtePaxv64EQvT0C2YLEYMfgh24WTu3rr8jMpOqbPWDtFUFgqUaI7PVGr4uHyT5glu86LtqUagZ4fIHkam5PkyTBRvBViwHBprzOaSwko0ZIdBA36-v++5YZoOFEP6MaBgAUmIngAHLoGGtDkJGeoBny8YMEmKZpgATJmmboLe8KEcRf48BMPCUMAQA
+ ## Phase 2: Chess Server Design
 
-#LOgin endpoint
+ ### Register Endpoint
+ https://sequencediagram.org/index.html?presentationMode=readOnly#initialData=FAZwDghgxgpsAuBLeAbGACASjA5ok8MATugKIB2AJmAPaLnzDDTw0kDCKiMDwkRSKIkgN0AZWIA3YnwgDEQkfCy58hIgAkIVNEVnzF25djwFiEopIVx+g4UfQBVEMQAiAQQDy+u0vTuAV3gACw9vWwV7UVcIeAgAIwgXJk5uBgBaAD4LaSIALnQABU8xABV0AHoAlxIACmricggAWxgAGnRIEBAAdzZKDphmiEQUAEpgHOIskzViLR1iAuDtSjRZsyJaohgARwCYAgmN9QW16cyT8ylrAp3TdXqaptaOrt7+weHRieArohy1iyzjcXgKOBg8BBWwaRBeMAm0LCWRicUSLgKADN6JR0LD0PEAJ5454tOCohJJGDpYE1MIFJGxCDoNjocgBFAoYBIrw0y6qTaA2AMulMlkkdmcpgQFDKaHw9AynYQSjEmAADzUIGA6F1Kge10sQJmAtOq10BXcKGVqtKEAA1jxSOrYGAkDRyDq9f8zro+VN8uhiERWTtwB7knrxFJpllUjx4AUNKVSoV0AAWAAMAGZgDAUC4nKTWorJCMUAk0F7df8hdTMjzPAUoMrCNCnm4mRMo42UUz0TACvQaspYdX0BSB3zGwUQAEoLBuuPeyaDQCbsL0HOF4dtePaxv64EQvT0C2YLEYMfgh24WTu3rr8jMpOqbPWDtFUFgqUaI7PVGr4uHyT5glu86LtqUagZ4fIHkam5PkyTBRvBViwHBprzOaSwko0ZIdBA36-v++5YZoOFEP6MaBgAUmIngAHLoGGtDkJGeoBny8YMEmKZpgATJmmboLe8KEcRf48BMPCUMAQA
+
+ ### Login Endpoint
 https://sequencediagram.org/index.html?presentationMode=readOnly#initialData=FAFwliA2CmAEAyB7A5mAdrAomgJgB0XRGGAEMBjERAJ1gGFIxo1i9Trxyw2XYBlaNQBug4Gw5guPEAhToAEqVwxqY9p25KZSVGgHDJ0NRKlbYAVQDOggCIBBAPLGN02HYCuIABb2n4l2Y2pCCkAEak1iQMTCwAtAB8+iLUAFywAAoOfAAqsAD01paWYIgYABTu1tRopAC20AA0sGxFAO40OACUwEmCCToKSjgqaV5DMANoZdTQAI7u0JYg3ZOKyn3xk0mGaZByU5WCNfVNLZbt1F0kW4JChglWto5pyNAgj9QVVcfQ3R++CSCIXC1jSADN0DhYIdaKEAJ7Q751IxAsIRaCxB5VXxpf7BUiwGiwNDuSCQYD-RyYzb7bbkaC47H4wm0ElkkikSAyACSaCEnLAUJhPxZzQi5w6wFg0tkujpGP6+zWw0EuJqni8NDAAC9oDhMAAPel4cClKUy1bjPoJXqpWCCahEmaWAhoSIy-i3a3xaLMEBpeTZbLpWAAFgADABGYDQSDWWAANQFUPIMxwfrAnMs5ulNwM9ISHm8ONgqegwWgRa8XyOyO6HqrAPiqJBDNgSxocFIGuyiAA1swc7AW+jqY3nu33OR6UUh+OHNS83d6WlG-iSB6l-dFbplSNEbWTrBu95ewO0EPLetqNTbWkAFJ8BwAOVgztd7pltupvpYAaDIYAEzhuGsA1tUyJNCeXhnsw3TMDgwBAA
 
-#logout endpoint
-https://sequencediagram.org/index.html?presentationMode=readOnly#initialData=FAFwliA2CmAEAyB7A5ogriWBRAdgEwAdEwcRhgBDAYxEQCdYBhSMaU4Aiu8KsT02AGVodAG4iOXHnwoCkqDAAlZeGHUncwvfpnnoQwsVugbpO2AEEMACwAiFgPKmtMgbYogKAIwoBnE8DMrKQAtAB8huJ0AFywtljwWAAqWLAA9P6+vmCIOLAAFBQ2SYgA1mwAlMCRIuF6SipqsdaN0PUg+XTQAI5o0L4gVe3K+Gp1KPqRxrGQExiFxWWV5O1TVNDhViB2jrHI0CBb1gvbJeU4VUf2DuHunj7+sQBmJHiwRadLOMB33n4bmxs11iVw8FFg9FgODQkEgwCujhC4wUBhEommliBYIhDGhsPIFEgmAAkjhRISwG8PtYzmxgLAGQg5qijOskWFhq0YrAAKo4an0MAAL2geCwAA91gRwLl6YzOaNauEatyRHRIV1fEQcP45QyVeygmwQLFFEkkgAFWAAFgADABGYDQSD+WAANQpVMW5z1TJRaw2YQRDlieGdB2gRxONK+VUZmO211uYIe0FD4ZAcGptO+8d+qfZwdivjQVHWWV9wfZqzRGJLZf6vnI8ZrrIBHOZI1UImLpfLTZbna57JVsWgAFtpQBPWAAKUEDgAcrBNdrdfGDeEjaRTearQAmW222AAbwAvk78MAgA
+### Logout Endpointhttps://sequencediagram.org/index.html?presentationMode=readOnly#initialData=FAFwliA2CmAEAyB7A5ogriWBRAdgEwAdEwcRhgBDAYxEQCdYBhSMaU4Aiu8KsT02AGVodAG4iOXHnwoCkqDAAlZeGHUncwvfpnnoQwsVugbpO2AEEMACwAiFgPKmtMgbYogKAIwoBnE8DMrKQAtAB8huJ0AFywtljwWAAqWLAA9P6+vmCIOLAAFBQ2SYgA1mwAlMCRIuF6SipqsdaN0PUg+XTQAI5o0L4gVe3K+Gp1KPqRxrGQExiFxWWV5O1TVNDhViB2jrHI0CBb1gvbJeU4VUf2DuHunj7+sQBmJHiwRadLOMB33n4bmxs11iVw8FFg9FgODQkEgwCujhC4wUBhEommliBYIhDGhsPIFEgmAAkjhRISwG8PtYzmxgLAGQg5qijOskWFhq0YrAAKo4an0MAAL2geCwAA91gRwLl6YzOaNauEatyRHRIV1fEQcP45QyVeygmwQLFFEkkgAFWAAFgADABGYDQSD+WAANQpVMW5z1TJRaw2YQRDlieGdB2gRxONK+VUZmO211uYIe0FD4ZAcGptO+8d+qfZwdivjQVHWWV9wfZqzRGJLZf6vnI8ZrrIBHOZI1UImLpfLTZbna57JVsWgAFtpQBPWAAKUEDgAcrBNdrdfGDeEjaRTearQAmW222AAbwAvk78MAgA
 
-#listgame endpoint
+ ### List Games Endpoint
 https://sequencediagram.org/index.html?presentationMode=readOnly#initialData=FAFwliA2CmAEAyYDOJYHECGBbaTYFEA7AEwAcB7MQkYYDAYxHICdYBhSMaa4UjZ8PTB9qsAMrRmAN0m9+g4RlGIUmHEgASS4jGZyBYISNRroE6Yej6Fx2AEEAriAAWAETsB5a4cWjT7rz4DIyVUVwwQDAAjDCQrYA4uagBaAD5zGWYALnR8ABVYAHoAc2w4AAoMJ2c88gBrbgBKYAzJNJUQU01tXRznHugOrvLmaABHB1wQZqGy7pJdNNMMyxzOVTnK6tqGwmbgZckpSzTHFwCc4ugQM+ctlx2m4FuAtPDImLicgDMqYlgqg96txgO9orFoMlTtULvYYREMLAWLBCA5IJBnjDPFDUocLPRoDkXgikaxUejaBhIKgAJKEKRUsD-QE1YGEYCwTnoMorAk42bqLQLSQ5ACqhBZLDAAC9oMR8AAPAmkcDkdlchDITpzIU6NppVrZWCSZjI0ZICiEOIcrmGnGJbggHIaPJ5AAKsAALAAGACMwGgkDisAAaozmds2TbOXjjnzcWVYettepys0Nf5sakwZ9CbBRiBmFwZAD0bBSupo7AcxCcZmPGstUjvtycGCq-W6zyjqtYMnm63oO2O938ZD2lqurren2m+QWxXcFWBbhp-r0kcRbAAFJiDwAOXzuEt1o1drSDuoztdHoATN7vbByoukM1uMRgEA
 
-#create game endpoint
-https://sequencediagram.org/index.html?presentationMode=readOnly#initialData=FAFwliA2CmAEDCAnaBDEcDiKC2cCiAdgCYAOA9mASMMCgMYhmIKRjRXAkqLh1hdVYAZWiIAbqM7de-FIKSp0WXAAk5RGIik8wfASFjLoI8bujaZ+2AEEAriAAWAEWsB5C7tmCjL91x16cgZOaCgARigAzubA8KzsIAC0AHwmEogAXLAACq5CACqwAPQA5jhwABQo9g75ZADW7AA0sGW4AHLlAJTAaaIpCmjQRmrEmlkO6jCDSuUVyACOttCRID0zw+WjGv3JRmlmWXTIQ0ZVNXWNBC1t0J24PcD7omJmKXaOvlkl0CAfDudHJd2D1-r4UiEQOEotAsgAzShEWDVIENdjASHQ6KJd41L42PGhWBMWAEWyQSDAMFuHF7coHOiwgmfIkkskUmgoSAGACSBDEXLASJRtTRBGAsElhnpLzeAxOs1UU1EWQAqgQRUwwAAvaBEPAAD0ZJHAZHFUoQCs2SrG-RSfUysFEiBJyEi5AI0QlUodtLibCoWRU+Xy2VgABYAAwARmA0Eg0VgADVBcKLmLvZLnqZGSkfG4jlazrd7tAehb864IaEItEspRojxSdAAO7S3CYzOwTG16C0yvfdiiIZI248pxdyv9mU5pljieTmevXPyxTW6DbcatcrjrsbEbKxC0h1ZABSQlc7Vgbo9XotvoG8UDsGDodgACZI5HYBV5z12EQwBAA
+ ### Create Game Endpoint
+ https://sequencediagram.org/index.html?presentationMode=readOnly#initialData=FAFwliA2CmAEDCAnaBDEcDiKC2cCiAdgCYAOA9mASMMCgMYhmIKRjRXAkqLh1hdVYAZWiIAbqM7de-FIKSp0WXAAk5RGIik8wfASFjLoI8bujaZ+2AEEAriAAWAEWsB5C7tmCjL91x16cgZOaCgARigAzubA8KzsIAC0AHwmEogAXLAACq5CACqwAPQA5jhwABQo9g75ZADW7AA0sGW4AHLlAJTAaaIpCmjQRmrEmlkO6jCDSuUVyACOttCRID0zw+WjGv3JRmlmWXTIQ0ZVNXWNBC1t0J24PcD7omJmKXaOvlkl0CAfDudHJd2D1-r4UiEQOEotAsgAzShEWDVIENdjASHQ6KJd41L42PGhWBMWAEWyQSDAMFuHF7coHOiwgmfIkkskUmgoSAGACSBDEXLASJRtTRBGAsElhnpLzeAxOs1UU1EWQAqgQRUwwAAvaBEPAAD0ZJHAZHFUoQCs2SrG-RSfUysFEiBJyEi5AI0QlUodtLibCoWRU+Xy2VgABYAAwARmA0Eg0VgADVBcKLmLvZLnqZGSkfG4jlazrd7tAehb864IaEItEspRojxSdAAO7S3CYzOwTG16C0yvfdiiIZI248pxdyv9mU5pljieTmevXPyxTW6DbcatcrjrsbEbKxC0h1ZABSQlc7Vgbo9XotvoG8UDsGDodgACZI5HYBV5z12EQwBAA
 
+# Join Game Endpoint
+ https://sequencediagram.org/index.html?presentationMode=readOnly#initialData=FAFwliA2CmAEBSB7MA7WBxAhgWzgURQBMAHZFEYYTAYxEQCdYBhSMac4Yze8asL8rADK0egDdRnbr36ZBSVFlwAJOYRj0pPMHwEgMOaCPE7oWmXtgBBAK4gAFgBErAeXM7ZgpdGduu23Tl9R0wQTAAjTABnM2AWNnIAWgA+Ywl6AC5YAAUAVQAVWAB6AHNDWAAKTDt7fMQAa3YAGlgy3ABJRxbiSEwAT1EmREgGAEpgNNEUhRRvVSINLPs1GBnvCvpoAEcbaCiQcbXDefUp5O800yyAKzJ16oc6xpQWtuhO7t6B+iGR+nHgBdRGJTClbA5fFkStAQOD7FUak92OM4b4UiEwpEYlkAGaoQiwB61BrsYAYiLRaCJME1SHWWmhTCwBiwFA2SCQYCo1zU86GS7UaBZVGM5mMNkcyiYSD6dooMTSsAEolIlDAWAagy4AVU6Z3Y4rURZXIoIkMMAAL2ghDwAA9BcRwIg1ZqEPqVIb6LzJplYMp8vlsrAACwABgAjOrNT7efF2CBjaaauarYRKNBIDFYAA1RXKxEkl2aoEmQUpbx06EgdZvTrjV0VnnJclYoWwPFEVrlcJ9WCdKMaluU3mNlxZCuilkSzkNwxo8v84FXLU+Sfi9mcgeEmUr2CERB7VmIfTQW1gfZb2fapdlvWKA0LI2wABCmEIACVtrt9naHU6i66GpHB6j5eikPpZP6gYhqGoaXtGwJTCkcbkFkr4Ep+Ox7BQW4Zlm3iwKe54gFE8EatK+iYd+IDWrA1DDCy0qbG+vZhM8ZGASWIK3skwHQCcizWJAzGEH0+SYM8v7QI6YDOhxrp8QJSGpIhvpQUGYYAMzyQh4jKShCbMAxjBMdALGwGxpIcXhcBUdhtH0X8hIKmAvThDAOkalxoJ8rgdI2MQhChNANaGB8sA9P0gzGS0NgxPQpq4PWgEpaO6KMq2WQBUFNERV8oiElEURgCUKC4BwKUpUOMQjnOrhZFENjUIKRWeSu86+UYN5to1zV7KRbXeTximeg1TUtaRlWASNoHeqpWTwEILgAHKwJsUSkCgMRtTGyGsPGkEBkGABMsGwAA3gAvtZRC4bd7BpkAA
+
+# Clear Database Endpoint
+https://sequencediagram.org/index.html?presentationMode=readOnly#initialData=FAFwliA2CmAEDCMCGAnWARJIkCMkGc4BRAOwBMAHAezBJGGCQGMQq1Exo7gLVwmwvOrADK0FADdxPPmAFCQCZCgASScjBQyU-QesWJoqMZLnRtuhbACqhFOgCCAeQty9whwFcQAC0cveHTcrAHEkAFtof1d5fQwsXAJzYA4uEABaAD4TKRQALgwiABkiABUiWAB6MhxgHPEsw1Q1DXECn3UyGCaUAAoAShTlFq6GzJ6cswKmZQGGCfEJMyzbcX9p5VWUfDmt-yzMbDxCArJoGBA4JEhIWE87fGBDxMJ0lbt12HxPJiZofEee2cb3GykmfwK31+-0eQyMKHB0CyXl8nxm8JRPlKVAA1lwdoNMftMs9jtBTudoJdYNdbkhvD5YKw8SRHqSkiCic5IT8-gDgFynCCFqYIV9eTD5mDFstMmFImjlPL-nNlcT2SdYGcLlcbrAAOYRf5PBJkkFq7ni6H8i1CxrS0Xkq182EipZ-YXDTqaHnWx49EaaEH1fKwFSlUoABVgACYAAxx2AAbwAvnVFg17Zw6AVw1HYwnk2mgA
