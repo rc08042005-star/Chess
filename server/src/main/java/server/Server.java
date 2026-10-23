@@ -121,6 +121,28 @@ public class Server {
                 );
             }
         });
+
+        // Endpoint 4: Logout user
+        javalin.delete("/session", ctx -> {
+            try {
+                String authToken = ctx.header("authorization");
+
+                userService.logout(authToken);
+
+                ctx.status(200);
+                ctx.result("{}");
+
+            } catch (SecurityException e) {
+                ctx.status(401).json(
+                        new ErrorResult("Error: unauthorized")
+                );
+
+            } catch (Exception e) {
+                ctx.status(500).json(
+                        new ErrorResult("Error: " + e.getMessage())
+                );
+            }
+        });
     }
 
     // Request for registering a user
