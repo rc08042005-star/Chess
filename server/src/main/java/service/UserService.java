@@ -19,6 +19,7 @@ public class UserService {
         this.authDAO = authDAO;
     }
 
+    // Register a new user
     public AuthData register(String username, String password, String email)
             throws DataAccessException {
 
@@ -33,6 +34,28 @@ public class UserService {
         }
 
         userDAO.createUser(new UserData(username, password, email));
+
+        String token = UUID.randomUUID().toString();
+        AuthData auth = new AuthData(token, username);
+        authDAO.createAuth(auth);
+
+        return auth;
+    }
+
+    // Log in an existing user
+    public AuthData login(String username, String password)
+            throws DataAccessException {
+
+        if (username == null || username.isBlank()
+                || password == null || password.isBlank()) {
+            throw new IllegalArgumentException("bad request");
+        }
+
+        UserData user = userDAO.getUser(username);
+
+        if (user == null || !user.password().equals(password)) {
+            throw new SecurityException("unauthorized");
+        }
 
         String token = UUID.randomUUID().toString();
         AuthData auth = new AuthData(token, username);
