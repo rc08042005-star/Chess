@@ -6,6 +6,9 @@ import dataaccess.*;
 import io.javalin.Javalin;
 import service.ClearService;
 import service.UserService;
+import service.GameService;
+
+import java.util.List;
 
 public class Server {
 
@@ -28,6 +31,9 @@ public class Server {
 
         UserService userService =
                 new UserService(userDAO, authDAO);
+
+        GameService gameService =
+                new GameService(gameDAO, authDAO);
 
         // Endpoint 1: Clear database
         javalin.delete("/db", ctx -> {
@@ -143,25 +149,71 @@ public class Server {
                 );
             }
         });
+
+        // Endpoint 5: List games
+        javalin.get("/game", ctx -> {
+            try {
+                String authToken = ctx.header("authorization");
+
+                var games = gameService.listGames(authToken);
+
+                List<GameSummary> gameSummaries =
+                        games.stream()
+                                .map(game -> new GameSummary(
+                                        game.gameID(),
+                                        game.whiteUsername(),
+                                        game.blackUsername(),
+                                        game.gameName()
+                                ))
+                                .toList();
+
+                ctx.status(200).json(
+                        new GamesResult(gameSummaries)
+                );
+
+            } catch (SecurityException e) {
+                ctx.status(401).json(
+                        new ErrorResult("Error: unauthorized")
+                );
+
+            } catch (Exception e) {
+                ctx.status(500).json(
+                        new ErrorResult("Error: " + e.getMessage())
+                );
+            }
+        });
     }
 
-    // Request for registering a user
+    // Registration request
     private record RegisterRequest(
             String username,
             String password,
             String email
     ) {}
 
-    // Request for logging in
+    // Login request
     private record LoginRequest(
             String username,
             String password
     ) {}
 
-    // Successful registration or login response
+    // Registration and login response
     private record AuthResult(
             String username,
             String authToken
+    ) {}
+
+    // Game summary
+    private record GameSummary(
+            int gameID,
+            String whiteUsername,
+            String blackUsername,
+            String gameName
+    ) {}
+
+    // List games response
+    private record GamesResult(
+            List<GameSummary> games
     ) {}
 
     // Error response
