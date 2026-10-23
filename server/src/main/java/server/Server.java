@@ -20,6 +20,8 @@ public class Server {
 
     public Server() {
 
+        System.out.println("DEBUG: MY SERVER CONSTRUCTOR IS RUNNING");
+
         javalin = Javalin.create(config -> {
             config.staticFiles.add("web");
             config.jsonMapper(new io.javalin.json.JavalinGson());
@@ -36,20 +38,32 @@ public class Server {
         GameService gameService =
                 new GameService(gameDAO, authDAO);
 
-        // Endpoint 1: Clear Database
+        // 1. CLEAR DATABASE
         javalin.delete("/db", ctx -> {
+
+            System.out.println("DEBUG: DELETE /db WAS CALLED");
+
             try {
                 clearService.clear();
-                ctx.status(200).result("{}");
+
+                System.out.println("DEBUG: Database cleared successfully");
+
+                ctx.status(200)
+                        .contentType("application/json")
+                        .result("{}");
 
             } catch (Exception e) {
+
+                System.out.println("DEBUG: Clear failed: " + e.getMessage());
+                e.printStackTrace();
+
                 ctx.status(500).json(
                         new ErrorResult("Error: " + e.getMessage())
                 );
             }
         });
 
-        // Endpoint 2: Register
+        // 2. REGISTER USER
         javalin.post("/user", ctx -> {
             try {
                 RegisterRequest request =
@@ -66,10 +80,7 @@ public class Server {
                 );
 
                 ctx.status(200).json(
-                        new AuthResult(
-                                auth.username(),
-                                auth.authToken()
-                        )
+                        new AuthResult(auth.username(), auth.authToken())
                 );
 
             } catch (IllegalArgumentException e) {
@@ -89,7 +100,7 @@ public class Server {
             }
         });
 
-        // Endpoint 3: Login
+        // 3. LOGIN USER
         javalin.post("/session", ctx -> {
             try {
                 LoginRequest request =
@@ -105,10 +116,7 @@ public class Server {
                 );
 
                 ctx.status(200).json(
-                        new AuthResult(
-                                auth.username(),
-                                auth.authToken()
-                        )
+                        new AuthResult(auth.username(), auth.authToken())
                 );
 
             } catch (IllegalArgumentException e) {
@@ -128,12 +136,10 @@ public class Server {
             }
         });
 
-        // Endpoint 4: Logout
+        // 4. LOGOUT USER
         javalin.delete("/session", ctx -> {
             try {
-                String authToken = ctx.header("authorization");
-
-                userService.logout(authToken);
+                userService.logout(ctx.header("authorization"));
 
                 ctx.status(200).result("{}");
 
@@ -149,22 +155,21 @@ public class Server {
             }
         });
 
-        // Endpoint 5: List Games
+        // 5. LIST GAMES
         javalin.get("/game", ctx -> {
             try {
-                String authToken = ctx.header("authorization");
+                var games = gameService.listGames(
+                        ctx.header("authorization")
+                );
 
-                var games = gameService.listGames(authToken);
-
-                List<GameSummary> summaries =
-                        games.stream()
-                                .map(game -> new GameSummary(
-                                        game.gameID(),
-                                        game.whiteUsername(),
-                                        game.blackUsername(),
-                                        game.gameName()
-                                ))
-                                .toList();
+                List<GameSummary> summaries = games.stream()
+                        .map(game -> new GameSummary(
+                                game.gameID(),
+                                game.whiteUsername(),
+                                game.blackUsername(),
+                                game.gameName()
+                        ))
+                        .toList();
 
                 ctx.status(200).json(
                         new GamesResult(summaries)
@@ -182,16 +187,13 @@ public class Server {
             }
         });
 
-        // Endpoint 6: Create Game
+        // 6. CREATE GAME
         javalin.post("/game", ctx -> {
             try {
                 String authToken = ctx.header("authorization");
 
                 CreateGameRequest request =
-                        gson.fromJson(
-                                ctx.body(),
-                                CreateGameRequest.class
-                        );
+                        gson.fromJson(ctx.body(), CreateGameRequest.class);
 
                 if (request == null) {
                     throw new IllegalArgumentException("bad request");
@@ -223,16 +225,13 @@ public class Server {
             }
         });
 
-        // Endpoint 7: Join Game
+        // 7. JOIN GAME
         javalin.put("/game", ctx -> {
             try {
                 String authToken = ctx.header("authorization");
 
                 JoinGameRequest request =
-                        gson.fromJson(
-                                ctx.body(),
-                                JoinGameRequest.class
-                        );
+                        gson.fromJson(ctx.body(), JoinGameRequest.class);
 
                 if (request == null || request.gameID() == null) {
                     throw new IllegalArgumentException("bad request");
@@ -268,8 +267,6 @@ public class Server {
             }
         });
     }
-
-    // Request and Response Records
 
     private record RegisterRequest(
             String username,
