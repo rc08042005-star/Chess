@@ -19,6 +19,7 @@ public class Server {
     private final GameDAO gameDAO = new MemoryGameDAO();
 
     public Server() {
+
         javalin = Javalin.create(config -> {
             config.staticFiles.add("web");
             config.jsonMapper(new io.javalin.json.JavalinGson());
@@ -35,7 +36,7 @@ public class Server {
         GameService gameService =
                 new GameService(gameDAO, authDAO);
 
-        // Endpoint 1: Clear database
+        // Endpoint 1: Clear Database
         javalin.delete("/db", ctx -> {
             try {
                 clearService.clear();
@@ -48,7 +49,7 @@ public class Server {
             }
         });
 
-        // Endpoint 2: Register user
+        // Endpoint 2: Register
         javalin.post("/user", ctx -> {
             try {
                 RegisterRequest request =
@@ -88,7 +89,7 @@ public class Server {
             }
         });
 
-        // Endpoint 3: Login user
+        // Endpoint 3: Login
         javalin.post("/session", ctx -> {
             try {
                 LoginRequest request =
@@ -127,7 +128,7 @@ public class Server {
             }
         });
 
-        // Endpoint 4: Logout user
+        // Endpoint 4: Logout
         javalin.delete("/session", ctx -> {
             try {
                 String authToken = ctx.header("authorization");
@@ -148,7 +149,7 @@ public class Server {
             }
         });
 
-        // Endpoint 5: List games
+        // Endpoint 5: List Games
         javalin.get("/game", ctx -> {
             try {
                 String authToken = ctx.header("authorization");
@@ -181,13 +182,16 @@ public class Server {
             }
         });
 
-        // Endpoint 6: Create game
+        // Endpoint 6: Create Game
         javalin.post("/game", ctx -> {
             try {
                 String authToken = ctx.header("authorization");
 
                 CreateGameRequest request =
-                        gson.fromJson(ctx.body(), CreateGameRequest.class);
+                        gson.fromJson(
+                                ctx.body(),
+                                CreateGameRequest.class
+                        );
 
                 if (request == null) {
                     throw new IllegalArgumentException("bad request");
@@ -218,7 +222,54 @@ public class Server {
                 );
             }
         });
+
+        // Endpoint 7: Join Game
+        javalin.put("/game", ctx -> {
+            try {
+                String authToken = ctx.header("authorization");
+
+                JoinGameRequest request =
+                        gson.fromJson(
+                                ctx.body(),
+                                JoinGameRequest.class
+                        );
+
+                if (request == null || request.gameID() == null) {
+                    throw new IllegalArgumentException("bad request");
+                }
+
+                gameService.joinGame(
+                        authToken,
+                        request.playerColor(),
+                        request.gameID()
+                );
+
+                ctx.status(200).result("{}");
+
+            } catch (SecurityException e) {
+                ctx.status(401).json(
+                        new ErrorResult("Error: unauthorized")
+                );
+
+            } catch (IllegalStateException e) {
+                ctx.status(403).json(
+                        new ErrorResult("Error: already taken")
+                );
+
+            } catch (IllegalArgumentException e) {
+                ctx.status(400).json(
+                        new ErrorResult("Error: bad request")
+                );
+
+            } catch (Exception e) {
+                ctx.status(500).json(
+                        new ErrorResult("Error: " + e.getMessage())
+                );
+            }
+        });
     }
+
+    // Request and Response Records
 
     private record RegisterRequest(
             String username,
@@ -253,6 +304,11 @@ public class Server {
 
     private record CreateGameResult(
             int gameID
+    ) {}
+
+    private record JoinGameRequest(
+            String playerColor,
+            Integer gameID
     ) {}
 
     private record ErrorResult(
