@@ -1,6 +1,7 @@
 
 package service;
 
+import chess.ChessGame;
 import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
@@ -18,15 +19,42 @@ public class GameService {
         this.authDAO = authDAO;
     }
 
-    // Get all games for an authenticated user
+    // Endpoint 5: List all games
     public Collection<GameData> listGames(String authToken)
+            throws DataAccessException {
+
+        validateAuth(authToken);
+        return gameDAO.listGames();
+    }
+
+    // Endpoint 6: Create a new game
+    public int createGame(String authToken, String gameName)
+            throws DataAccessException {
+
+        validateAuth(authToken);
+
+        if (gameName == null || gameName.isBlank()) {
+            throw new IllegalArgumentException("bad request");
+        }
+
+        GameData game = new GameData(
+                0,
+                null,
+                null,
+                gameName,
+                new ChessGame()
+        );
+
+        return gameDAO.createGame(game);
+    }
+
+    // Verify that the user is authenticated
+    private void validateAuth(String authToken)
             throws DataAccessException {
 
         if (authToken == null || authToken.isBlank()
                 || authDAO.getAuth(authToken) == null) {
             throw new SecurityException("unauthorized");
         }
-
-        return gameDAO.listGames();
     }
 }

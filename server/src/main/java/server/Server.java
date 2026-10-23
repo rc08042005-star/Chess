@@ -5,8 +5,8 @@ import com.google.gson.Gson;
 import dataaccess.*;
 import io.javalin.Javalin;
 import service.ClearService;
-import service.UserService;
 import service.GameService;
+import service.UserService;
 
 import java.util.List;
 
@@ -39,8 +39,7 @@ public class Server {
         javalin.delete("/db", ctx -> {
             try {
                 clearService.clear();
-                ctx.status(200);
-                ctx.result("{}");
+                ctx.status(200).result("{}");
 
             } catch (Exception e) {
                 ctx.status(500).json(
@@ -135,8 +134,7 @@ public class Server {
 
                 userService.logout(authToken);
 
-                ctx.status(200);
-                ctx.result("{}");
+                ctx.status(200).result("{}");
 
             } catch (SecurityException e) {
                 ctx.status(401).json(
@@ -157,7 +155,7 @@ public class Server {
 
                 var games = gameService.listGames(authToken);
 
-                List<GameSummary> gameSummaries =
+                List<GameSummary> summaries =
                         games.stream()
                                 .map(game -> new GameSummary(
                                         game.gameID(),
@@ -168,7 +166,7 @@ public class Server {
                                 .toList();
 
                 ctx.status(200).json(
-                        new GamesResult(gameSummaries)
+                        new GamesResult(summaries)
                 );
 
             } catch (SecurityException e) {
@@ -182,28 +180,62 @@ public class Server {
                 );
             }
         });
+
+        // Endpoint 6: Create game
+        javalin.post("/game", ctx -> {
+            try {
+                String authToken = ctx.header("authorization");
+
+                CreateGameRequest request =
+                        gson.fromJson(ctx.body(), CreateGameRequest.class);
+
+                if (request == null) {
+                    throw new IllegalArgumentException("bad request");
+                }
+
+                int gameID = gameService.createGame(
+                        authToken,
+                        request.gameName()
+                );
+
+                ctx.status(200).json(
+                        new CreateGameResult(gameID)
+                );
+
+            } catch (SecurityException e) {
+                ctx.status(401).json(
+                        new ErrorResult("Error: unauthorized")
+                );
+
+            } catch (IllegalArgumentException e) {
+                ctx.status(400).json(
+                        new ErrorResult("Error: bad request")
+                );
+
+            } catch (Exception e) {
+                ctx.status(500).json(
+                        new ErrorResult("Error: " + e.getMessage())
+                );
+            }
+        });
     }
 
-    // Registration request
     private record RegisterRequest(
             String username,
             String password,
             String email
     ) {}
 
-    // Login request
     private record LoginRequest(
             String username,
             String password
     ) {}
 
-    // Registration and login response
     private record AuthResult(
             String username,
             String authToken
     ) {}
 
-    // Game summary
     private record GameSummary(
             int gameID,
             String whiteUsername,
@@ -211,12 +243,18 @@ public class Server {
             String gameName
     ) {}
 
-    // List games response
     private record GamesResult(
             List<GameSummary> games
     ) {}
 
-    // Error response
+    private record CreateGameRequest(
+            String gameName
+    ) {}
+
+    private record CreateGameResult(
+            int gameID
+    ) {}
+
     private record ErrorResult(
             String message
     ) {}
