@@ -6,6 +6,7 @@ import dataaccess.DataAccessException;
 import dataaccess.UserDAO;
 import model.AuthData;
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.UUID;
 
@@ -53,7 +54,7 @@ public class UserService {
 
         UserData user = userDAO.getUser(username);
 
-        if (user == null || !user.password().equals(password)) {
+        if (user == null || !passwordMatches(password, user.password())) {
             throw new SecurityException("unauthorized");
         }
 
@@ -62,6 +63,26 @@ public class UserService {
         authDAO.createAuth(auth);
 
         return auth;
+    }
+
+    // Verify passwords for SQL and memory DAOs
+    private boolean passwordMatches(String password, String storedPassword) {
+        if (storedPassword == null) {
+            return false;
+        }
+
+        if (storedPassword.startsWith("$2a$")
+                || storedPassword.startsWith("$2b$")
+                || storedPassword.startsWith("$2y$")) {
+            try {
+                return BCrypt.checkpw(password, storedPassword);
+            } catch (IllegalArgumentException e) {
+                return false;
+            }
+        }
+
+        // Supports existing memory DAO tests
+        return storedPassword.equals(password);
     }
 
     // Log out an existing user
