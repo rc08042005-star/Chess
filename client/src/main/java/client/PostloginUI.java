@@ -5,6 +5,7 @@ import chess.ChessBoard;
 import chess.ChessGame;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Scanner;
 
 public class PostloginUI {
@@ -36,7 +37,9 @@ public class PostloginUI {
                 return;
             }
 
-            String command = scanner.nextLine().trim().toLowerCase();
+            String command = scanner.nextLine()
+                    .trim()
+                    .toLowerCase(Locale.ROOT);
 
             try {
                 switch (command) {
@@ -65,6 +68,11 @@ public class PostloginUI {
 
     private void createGame() throws ServerFacadeException {
         System.out.print("Game name: ");
+
+        if (!scanner.hasNextLine()) {
+            return;
+        }
+
         String gameName = scanner.nextLine().trim();
 
         if (gameName.isEmpty()) {
@@ -73,7 +81,9 @@ public class PostloginUI {
         }
 
         serverFacade.createGame(authToken, gameName);
-        System.out.println("Game created successfully: " + gameName);
+
+        System.out.println(
+                "Game created successfully: " + gameName);
     }
 
     private void listGames() throws ServerFacadeException {
@@ -93,28 +103,56 @@ public class PostloginUI {
                 serverFacade.listGames(authToken);
 
         if (games.isEmpty()) {
-            System.out.println("No games available. Create a game first.");
+            System.out.println(
+                    "No games available. Create a game first.");
             return;
         }
 
         displayGames(games);
 
         int selection = selectGame(games.size());
+
         if (selection < 0) {
             return;
         }
 
         ApiModels.GameSummary game = games.get(selection);
 
-        System.out.print("Choose a color (WHITE/BLACK): ");
-        String color = scanner.nextLine().trim().toUpperCase();
+        System.out.print(
+                "Choose a color (WHITE/BLACK or 'cancel'): ");
 
-        if (!color.equals("WHITE") && !color.equals("BLACK")) {
-            System.out.println("Invalid color. Enter WHITE or BLACK.");
+        if (!scanner.hasNextLine()) {
             return;
         }
 
-        serverFacade.joinGame(authToken, color, game.gameID());
+        String color = scanner.nextLine()
+                .trim()
+                .toUpperCase(Locale.ROOT);
+
+        if (color.equals("CANCEL")) {
+            System.out.println("Joining game cancelled.");
+            return;
+        }
+
+        if (!color.equals("WHITE") && !color.equals("BLACK")) {
+            System.out.println(
+                    "Invalid color. Enter WHITE or BLACK.");
+            return;
+        }
+
+        String currentPlayer = color.equals("WHITE")
+                ? game.whiteUsername()
+                : game.blackUsername();
+
+        if (currentPlayer != null) {
+            System.out.println(
+                    "That color is already taken. "
+                            + "Choose another game or color.");
+            return;
+        }
+
+        serverFacade.joinGame(
+                authToken, color, game.gameID());
 
         ChessGame.TeamColor perspective =
                 ChessGame.TeamColor.valueOf(color);
@@ -124,7 +162,8 @@ public class PostloginUI {
 
         boardRenderer.drawBoard(board, perspective);
 
-        System.out.println("Joined game: " + game.gameName());
+        System.out.println(
+                "Joined game: " + game.gameName());
     }
 
     private void observeGame() throws ServerFacadeException {
@@ -132,13 +171,15 @@ public class PostloginUI {
                 serverFacade.listGames(authToken);
 
         if (games.isEmpty()) {
-            System.out.println("No games available to observe.");
+            System.out.println(
+                    "No games available to observe.");
             return;
         }
 
         displayGames(games);
 
         int selection = selectGame(games.size());
+
         if (selection < 0) {
             return;
         }
@@ -151,10 +192,13 @@ public class PostloginUI {
         boardRenderer.drawBoard(
                 board, ChessGame.TeamColor.WHITE);
 
-        System.out.println("Observing game: " + game.gameName());
+        System.out.println(
+                "Observing game: " + game.gameName());
     }
 
-    private void displayGames(List<ApiModels.GameSummary> games) {
+    private void displayGames(
+            List<ApiModels.GameSummary> games) {
+
         System.out.println("\nAvailable games:");
 
         for (int i = 0; i < games.size(); i++) {
@@ -171,28 +215,44 @@ public class PostloginUI {
     }
 
     private int selectGame(int gameCount) {
-        System.out.print("Select game number: ");
-        String input = scanner.nextLine().trim();
+        while (true) {
+            System.out.print(
+                    "Select game number (or 'cancel'): ");
 
-        try {
-            int selection = Integer.parseInt(input);
-
-            if (selection < 1 || selection > gameCount) {
-                System.out.println(
-                        "Please choose a listed game number.");
+            if (!scanner.hasNextLine()) {
                 return -1;
             }
 
-            return selection - 1;
+            String input = scanner.nextLine().trim();
 
-        } catch (NumberFormatException e) {
-            System.out.println("Please enter a valid number.");
-            return -1;
+            if (input.equalsIgnoreCase("cancel")) {
+                System.out.println(
+                        "Game selection cancelled.");
+                return -1;
+            }
+
+            try {
+                int selection = Integer.parseInt(input);
+
+                if (selection >= 1 && selection <= gameCount) {
+                    return selection - 1;
+                }
+
+                System.out.println(
+                        "Please choose a number between 1 and "
+                                + gameCount + ".");
+
+            } catch (NumberFormatException e) {
+                System.out.println(
+                        "Invalid input. Enter a number or 'cancel'.");
+            }
         }
     }
 
     private String playerName(String username) {
-        return username == null ? "Available" : username;
+        return username == null
+                ? "Available"
+                : username;
     }
 
     private void printHelp() {
