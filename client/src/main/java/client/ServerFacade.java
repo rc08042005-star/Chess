@@ -4,7 +4,6 @@ package client;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -27,7 +26,10 @@ public class ServerFacade {
     }
 
     public ServerFacade(String baseUrl) {
-        this.baseUrl = baseUrl;
+        this.baseUrl = baseUrl.endsWith("/")
+                ? baseUrl.substring(0, baseUrl.length() - 1)
+                : baseUrl;
+
         this.httpClient = HttpClient.newHttpClient();
         this.gson = new Gson();
     }
@@ -39,7 +41,8 @@ public class ServerFacade {
         var request = new ApiModels.RegisterRequest(
                 username, password, email);
 
-        return sendRequest("POST", "/user", request, null,
+        return sendRequest(
+                "POST", "/user", request, null,
                 ApiModels.AuthResult.class);
     }
 
@@ -47,16 +50,19 @@ public class ServerFacade {
             String username, String password)
             throws ServerFacadeException {
 
-        var request = new ApiModels.LoginRequest(username, password);
+        var request = new ApiModels.LoginRequest(
+                username, password);
 
-        return sendRequest("POST", "/session", request, null,
+        return sendRequest(
+                "POST", "/session", request, null,
                 ApiModels.AuthResult.class);
     }
 
     public void logout(String authToken)
             throws ServerFacadeException {
 
-        sendRequest("DELETE", "/session", null, authToken,
+        sendRequest(
+                "DELETE", "/session", null, authToken,
                 Void.class);
     }
 
@@ -65,7 +71,8 @@ public class ServerFacade {
 
         var request = new ApiModels.CreateGameRequest(gameName);
 
-        var result = sendRequest("POST", "/game", request, authToken,
+        var result = sendRequest(
+                "POST", "/game", request, authToken,
                 ApiModels.CreateGameResult.class);
 
         return result.gameID();
@@ -74,7 +81,8 @@ public class ServerFacade {
     public List<ApiModels.GameSummary> listGames(String authToken)
             throws ServerFacadeException {
 
-        var result = sendRequest("GET", "/game", null, authToken,
+        var result = sendRequest(
+                "GET", "/game", null, authToken,
                 ApiModels.GamesResult.class);
 
         return result.games();
@@ -87,12 +95,16 @@ public class ServerFacade {
         var request = new ApiModels.JoinGameRequest(
                 playerColor, gameID);
 
-        sendRequest("PUT", "/game", request, authToken,
+        sendRequest(
+                "PUT", "/game", request, authToken,
                 Void.class);
     }
 
     public void clear() throws ServerFacadeException {
-        sendRequest("DELETE", "/db", null, null, Void.class);
+
+        sendRequest(
+                "DELETE", "/db", null, null,
+                Void.class);
     }
 
     private <T> T sendRequest(
@@ -114,12 +126,15 @@ public class ServerFacade {
 
         if (requestBody != null) {
             builder.header("Content-Type", "application/json");
-            builder.method(method,
+
+            builder.method(
+                    method,
                     HttpRequest.BodyPublishers.ofString(
                             gson.toJson(requestBody),
                             StandardCharsets.UTF_8));
         } else {
-            builder.method(method,
+            builder.method(
+                    method,
                     HttpRequest.BodyPublishers.noBody());
         }
 
@@ -131,6 +146,7 @@ public class ServerFacade {
 
             if (response.statusCode() < 200
                     || response.statusCode() >= 300) {
+
                 throw new ServerFacadeException(
                         errorMessage(response));
             }
@@ -155,6 +171,7 @@ public class ServerFacade {
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+
             throw new ServerFacadeException(
                     "The server request was interrupted.", e);
 
@@ -165,15 +182,21 @@ public class ServerFacade {
     }
 
     private String errorMessage(HttpResponse<String> response) {
+
         try {
             var error = gson.fromJson(
-                    response.body(), ApiModels.ErrorResult.class);
+                    response.body(),
+                    ApiModels.ErrorResult.class);
 
-            if (error != null && error.message() != null) {
+            if (error != null
+                    && error.message() != null
+                    && !error.message().isBlank()) {
+
                 return error.message();
             }
+
         } catch (JsonSyntaxException ignored) {
-            // Use a safe message if the response is not valid JSON.
+            // Use a safe fallback if the response is invalid JSON.
         }
 
         return "The server could not complete the request.";
