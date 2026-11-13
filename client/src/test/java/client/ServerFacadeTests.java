@@ -1,12 +1,15 @@
 
 package client;
 
+import com.sun.net.httpserver.HttpServer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import server.Server;
 
+import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -213,5 +216,104 @@ public class ServerFacadeTests {
             facade.clear();
             facade.clear();
         });
+    }
+
+    @Test
+    public void connectionFailureThrowsException() {
+        ServerFacade unavailableServer =
+                new ServerFacade("http://127.0.0.1:0");
+
+        ServerFacadeException exception = assertThrows(
+                ServerFacadeException.class,
+                () -> unavailableServer.listGames("testToken"));
+
+        assertEquals(
+                "Could not connect to the chess server.",
+                exception.getMessage());
+
+        assertNotNull(exception.getCause());
+    }
+
+    @Test
+    public void malformedServerResponseThrowsException() throws Exception {
+        HttpServer fakeServer = createFakeServer(200, "{invalid json");
+
+        try {
+            ServerFacade testFacade =
+                    new ServerFacade(fakeServer.getAddress().getPort());
+
+            ServerFacadeException exception = assertThrows(
+                    ServerFacadeException.class,
+                    () -> testFacade.login("testuser", "password"));
+
+            assertEquals(
+                    "The server returned an invalid response.",
+                    exception.getMessage());
+        } finally {
+            fakeServer.stop(0);
+        }
+    }
+
+    @Test
+    public void emptyServerResponseThrowsException() throws Exception {
+        HttpServer fakeServer = createFakeServer(200, "null");
+
+        try {
+            ServerFacade testFacade =
+                    new ServerFacade(fakeServer.getAddress().getPort());
+
+            ServerFacadeException exception = assertThrows(
+                    ServerFacadeException.class,
+                    () -> testFacade.login("testuser", "password"));
+
+            assertEquals(
+                    "The server returned an empty response.",
+                    exception.getMessage());
+        } finally {
+            fakeServer.stop(0);
+        }
+    }
+
+    @Test
+    public void malformedErrorResponseUsesSafeMessage() throws Exception {
+        HttpServer fakeServer = createFakeServer(500, "{invalid json");
+
+        try {
+            ServerFacade testFacade =
+                    new ServerFacade(fakeServer.getAddress().getPort());
+
+            ServerFacadeException exception = assertThrows(
+                    ServerFacadeException.class,
+                    () -> testFacade.login("testuser", "password"));
+
+            assertEquals(
+                    "The server could not complete the request.",
+                    exception.getMessage());
+        } finally {
+            fakeServer.stop(0);
+        }
+    }
+
+    private HttpServer createFakeServer(int statusCode, String body)
+            throws Exception {
+
+        HttpServer fakeServer = HttpServer.create(
+                new InetSocketAddress("127.0.0.1", 0), 0);
+
+        fakeServer.createContext("/session", exchange -> {
+            byte[] response = body.getBytes(StandardCharsets.UTF_8);
+
+            exchange.getResponseHeaders().set(
+                    "Content-Type", "application/json");
+
+            exchange.sendResponseHeaders(statusCode, response.length);
+
+            try (var output = exchange.getResponseBody()) {
+                output.write(response);
+            }
+        });
+
+        fakeServer.start();
+        return fakeServer;
     }
 }
