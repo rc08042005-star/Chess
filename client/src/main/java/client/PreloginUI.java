@@ -1,12 +1,14 @@
 
 package client;
 
+import java.util.Locale;
 import java.util.Scanner;
 
 public class PreloginUI {
 
     private final ServerFacade serverFacade;
     private final Scanner scanner;
+
     private String authToken;
     private boolean running = true;
 
@@ -24,16 +26,18 @@ public class PreloginUI {
 
             if (!scanner.hasNextLine()) {
                 running = false;
-                break;
+                return;
             }
 
-            String command = scanner.nextLine().trim().toLowerCase();
+            String command = scanner.nextLine()
+                    .trim()
+                    .toLowerCase(Locale.ROOT);
 
             try {
                 handleCommand(command);
             } catch (ServerFacadeException e) {
-                System.out.println("Unable to complete request: "
-                        + e.getMessage());
+                System.out.println(
+                        "Unable to complete request: " + e.getMessage());
             }
         }
     }
@@ -46,6 +50,7 @@ public class PreloginUI {
             case "login" -> login();
             case "register" -> register();
             case "quit", "exit" -> quit();
+
             default -> System.out.println(
                     "Unknown command. Type 'help' for options.");
         }
@@ -53,31 +58,72 @@ public class PreloginUI {
 
     private void login() throws ServerFacadeException {
         String username = prompt("Username");
+
+        if (username == null) {
+            return;
+        }
+
         String password = prompt("Password");
+
+        if (password == null) {
+            return;
+        }
 
         ApiModels.AuthResult result =
                 serverFacade.login(username, password);
 
         authToken = result.authToken();
-        System.out.println("Logged in as " + result.username());
+
+        System.out.println(
+                "Logged in as " + result.username());
     }
 
     private void register() throws ServerFacadeException {
         String username = prompt("Username");
+
+        if (username == null) {
+            return;
+        }
+
         String password = prompt("Password");
+
+        if (password == null) {
+            return;
+        }
+
         String email = prompt("Email");
+
+        if (email == null) {
+            return;
+        }
 
         ApiModels.AuthResult result =
                 serverFacade.register(username, password, email);
 
         authToken = result.authToken();
-        System.out.println("Registered and logged in as "
-                + result.username());
+
+        System.out.println(
+                "Registered and logged in as " + result.username());
     }
 
     private String prompt(String label) {
-        System.out.print(label + ": ");
-        return scanner.nextLine().trim();
+        while (true) {
+            System.out.print(label + ": ");
+
+            if (!scanner.hasNextLine()) {
+                running = false;
+                return null;
+            }
+
+            String input = scanner.nextLine().trim();
+
+            if (!input.isEmpty()) {
+                return input;
+            }
+
+            System.out.println(
+                    label + " cannot be empty. Please try again.");
+        }
     }
 
     private void quit() {
