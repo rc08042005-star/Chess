@@ -13,6 +13,13 @@ public class ClientMain {
         if (args.length > 0) {
             try {
                 port = Integer.parseInt(args[0]);
+
+                if (port < 1 || port > 65535) {
+                    System.out.println(
+                            "Invalid port. Using default port 8080.");
+                    port = DEFAULT_PORT;
+                }
+
             } catch (NumberFormatException e) {
                 System.out.println(
                         "Invalid port. Using default port 8080.");
@@ -22,29 +29,28 @@ public class ClientMain {
         ServerFacade serverFacade = new ServerFacade(port);
 
         try (Scanner scanner = new Scanner(System.in)) {
-            boolean running = true;
 
-            while (running) {
+            while (scanner.hasNextLine()) {
+
                 PreloginUI preloginUI =
                         new PreloginUI(serverFacade, scanner);
 
                 preloginUI.run();
 
                 if (!preloginUI.isRunning()) {
-                    running = false;
-                } else if (preloginUI.getAuthToken() != null) {
+                    break;
+                }
+
+                String authToken = preloginUI.getAuthToken();
+
+                if (authToken != null) {
                     PostloginUI postloginUI =
                             new PostloginUI(
                                     serverFacade,
                                     scanner,
-                                    preloginUI.getAuthToken()
-                            );
+                                    authToken);
 
                     postloginUI.run();
-
-                    if (!scanner.hasNextLine()) {
-                        running = false;
-                    }
                 }
             }
         }
