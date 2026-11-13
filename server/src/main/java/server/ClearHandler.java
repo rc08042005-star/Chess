@@ -1,6 +1,8 @@
 
 package server;
 
+import model.ApiModels;
+
 import io.javalin.http.Context;
 import service.ClearService;
 

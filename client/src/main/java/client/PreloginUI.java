@@ -1,6 +1,6 @@
 
 package client;
-
+import model.ApiModels;
 import java.util.Locale;
 import java.util.Scanner;
 

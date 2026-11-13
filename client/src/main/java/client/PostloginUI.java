@@ -1,6 +1,6 @@
 
 package client;
-
+import model.ApiModels;
 import chess.ChessBoard;
 import chess.ChessGame;
 

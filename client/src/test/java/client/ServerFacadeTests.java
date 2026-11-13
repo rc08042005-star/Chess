@@ -1,6 +1,7 @@
 
 package client;
 
+import model.ApiModels;
 import com.sun.net.httpserver.HttpServer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;

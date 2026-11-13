@@ -1,8 +1,13 @@
 
-package client;
+
+
+package model;
 
 import java.util.List;
 
+/**
+ * Request and response models shared by the client and server.
+ */
 public final class ApiModels {
 
     private ApiModels() {
@@ -12,43 +17,52 @@ public final class ApiModels {
             String username,
             String password,
             String email
-    ) {}
+    ) {
+    }
 
     public record LoginRequest(
             String username,
             String password
-    ) {}
+    ) {
+    }
 
     public record AuthResult(
             String username,
             String authToken
-    ) {}
+    ) {
+    }
 
     public record GameSummary(
             int gameID,
             String whiteUsername,
             String blackUsername,
             String gameName
-    ) {}
+    ) {
+    }
 
     public record GamesResult(
             List<GameSummary> games
-    ) {}
+    ) {
+    }
 
     public record CreateGameRequest(
             String gameName
-    ) {}
+    ) {
+    }
 
     public record CreateGameResult(
             int gameID
-    ) {}
+    ) {
+    }
 
     public record JoinGameRequest(
             String playerColor,
             Integer gameID
-    ) {}
+    ) {
+    }
 
     public record ErrorResult(
             String message
-    ) {}
+    ) {
+    }
 }

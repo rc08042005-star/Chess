@@ -1,6 +1,7 @@
 
 package client;
 
+import model.ApiModels;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
@@ -12,6 +13,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
+
 
 public class ServerFacade {
 

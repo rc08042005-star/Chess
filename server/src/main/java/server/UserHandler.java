@@ -1,6 +1,6 @@
 
 package server;
-
+import model.ApiModels;
 import com.google.gson.Gson;
 import io.javalin.http.Context;
 import service.UserService;
