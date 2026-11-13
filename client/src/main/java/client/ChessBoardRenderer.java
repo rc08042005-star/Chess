@@ -8,63 +8,80 @@ import chess.ChessPosition;
 
 public class ChessBoardRenderer {
 
-    public void drawBoard(ChessBoard board, ChessGame.TeamColor perspective) {
+    private static final String RESET = "\u001B[0m";
+    private static final String LIGHT_SQUARE = "\u001B[47m";
+    private static final String DARK_SQUARE = "\u001B[100m";
+    private static final String WHITE_PIECE = "\u001B[97m";
+    private static final String BLACK_PIECE = "\u001B[30m";
+
+    public void drawBoard(ChessBoard board,
+                          ChessGame.TeamColor perspective) {
+
         boolean whitePerspective =
                 perspective == ChessGame.TeamColor.WHITE;
 
-        int firstRow = whitePerspective ? 8 : 1;
-        int lastRow = whitePerspective ? 1 : 8;
+        int rowStart = whitePerspective ? 8 : 1;
+        int rowEnd = whitePerspective ? 1 : 8;
         int rowStep = whitePerspective ? -1 : 1;
 
-        int firstColumn = whitePerspective ? 1 : 8;
-        int lastColumn = whitePerspective ? 8 : 1;
-        int columnStep = whitePerspective ? 1 : -1;
+        int colStart = whitePerspective ? 1 : 8;
+        int colEnd = whitePerspective ? 8 : 1;
+        int colStep = whitePerspective ? 1 : -1;
 
         System.out.println();
+        printColumnLabels(colStart, colEnd, colStep);
 
-        printColumnLabels(firstColumn, lastColumn, columnStep);
-
-        for (int row = firstRow;
-             whitePerspective ? row >= lastRow : row <= lastRow;
+        for (int row = rowStart;
+             whitePerspective ? row >= rowEnd : row <= rowEnd;
              row += rowStep) {
 
             System.out.print(" " + row + " ");
 
-            for (int column = firstColumn;
-                 whitePerspective
-                         ? column <= lastColumn
-                         : column >= lastColumn;
-                 column += columnStep) {
+            for (int col = colStart;
+                 whitePerspective ? col <= colEnd : col >= colEnd;
+                 col += colStep) {
 
                 ChessPosition position =
-                        new ChessPosition(row, column);
+                        new ChessPosition(row, col);
 
                 ChessPiece piece = board.getPiece(position);
 
-                System.out.print(" " + pieceSymbol(piece) + " ");
+                boolean lightSquare = (row + col) % 2 != 0;
+
+                String background = lightSquare
+                        ? LIGHT_SQUARE
+                        : DARK_SQUARE;
+
+                String foreground = piece != null
+                        && piece.getTeamColor()
+                        == ChessGame.TeamColor.WHITE
+                        ? WHITE_PIECE
+                        : BLACK_PIECE;
+
+                System.out.print(
+                        background + foreground
+                                + " " + pieceSymbol(piece) + " "
+                                + RESET);
             }
 
             System.out.println(" " + row);
         }
 
-        printColumnLabels(firstColumn, lastColumn, columnStep);
+        printColumnLabels(colStart, colEnd, colStep);
         System.out.println();
     }
 
-    private void printColumnLabels(
-            int firstColumn,
-            int lastColumn,
-            int columnStep) {
+    private void printColumnLabels(int start,
+                                   int end,
+                                   int step) {
 
         System.out.print("   ");
 
-        for (int column = firstColumn;
-             columnStep > 0
-                     ? column <= lastColumn
-                     : column >= lastColumn;
-             column += columnStep) {
+        for (int col = start;
+             step > 0 ? col <= end : col >= end;
+             col += step) {
 
-            char label = (char) ('a' + column - 1);
+            char label = (char) ('a' + col - 1);
             System.out.print(" " + label + " ");
         }
 
@@ -72,20 +89,22 @@ public class ChessBoardRenderer {
     }
 
     private String pieceSymbol(ChessPiece piece) {
+
         if (piece == null) {
-            return ".";
+            return " ";
         }
 
         boolean white =
-                piece.getTeamColor() == ChessGame.TeamColor.WHITE;
+                piece.getTeamColor()
+                        == ChessGame.TeamColor.WHITE;
 
         return switch (piece.getPieceType()) {
-            case KING -> white ? "K" : "k";
-            case QUEEN -> white ? "Q" : "q";
-            case ROOK -> white ? "R" : "r";
-            case BISHOP -> white ? "B" : "b";
-            case KNIGHT -> white ? "N" : "n";
-            case PAWN -> white ? "P" : "p";
+            case KING -> white ? "♔" : "♚";
+            case QUEEN -> white ? "♕" : "♛";
+            case ROOK -> white ? "♖" : "♜";
+            case BISHOP -> white ? "♗" : "♝";
+            case KNIGHT -> white ? "♘" : "♞";
+            case PAWN -> white ? "♙" : "♟";
         };
     }
 }
