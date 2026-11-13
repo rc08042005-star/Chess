@@ -118,49 +118,18 @@ public class PostloginUI {
 
         ApiModels.GameSummary game = games.get(selection);
 
-        System.out.print(
-                "Choose a color (WHITE/BLACK or 'cancel'): ");
+        ChessGame.TeamColor perspective = selectColor(game);
 
-        if (!scanner.hasNextLine()) {
-            return;
-        }
-
-        String color = scanner.nextLine()
-                .trim()
-                .toUpperCase(Locale.ROOT);
-
-        if (color.equals("CANCEL")) {
-            System.out.println("Joining game cancelled.");
-            return;
-        }
-
-        if (!color.equals("WHITE") && !color.equals("BLACK")) {
-            System.out.println(
-                    "Invalid color. Enter WHITE or BLACK.");
-            return;
-        }
-
-        String currentPlayer = color.equals("WHITE")
-                ? game.whiteUsername()
-                : game.blackUsername();
-
-        if (currentPlayer != null) {
-            System.out.println(
-                    "That color is already taken. "
-                            + "Choose another game or color.");
+        if (perspective == null) {
             return;
         }
 
         serverFacade.joinGame(
-                authToken, color, game.gameID());
+                authToken,
+                perspective.name(),
+                game.gameID());
 
-        ChessGame.TeamColor perspective =
-                ChessGame.TeamColor.valueOf(color);
-
-        ChessBoard board = new ChessBoard();
-        board.resetBoard();
-
-        boardRenderer.drawBoard(board, perspective);
+        displayInitialBoard(perspective);
 
         System.out.println(
                 "Joined game: " + game.gameName());
@@ -186,14 +155,60 @@ public class PostloginUI {
 
         ApiModels.GameSummary game = games.get(selection);
 
-        ChessBoard board = new ChessBoard();
-        board.resetBoard();
-
-        boardRenderer.drawBoard(
-                board, ChessGame.TeamColor.WHITE);
+        displayInitialBoard(ChessGame.TeamColor.WHITE);
 
         System.out.println(
                 "Observing game: " + game.gameName());
+    }
+
+    private ChessGame.TeamColor selectColor(
+            ApiModels.GameSummary game) {
+
+        while (true) {
+            System.out.print(
+                    "Choose a color (WHITE/BLACK or 'cancel'): ");
+
+            if (!scanner.hasNextLine()) {
+                return null;
+            }
+
+            String input = scanner.nextLine()
+                    .trim()
+                    .toUpperCase(Locale.ROOT);
+
+            if (input.equals("CANCEL")) {
+                System.out.println("Joining game cancelled.");
+                return null;
+            }
+
+            if (!input.equals("WHITE") && !input.equals("BLACK")) {
+                System.out.println(
+                        "Invalid color. Enter WHITE or BLACK.");
+                continue;
+            }
+
+            String currentPlayer = input.equals("WHITE")
+                    ? game.whiteUsername()
+                    : game.blackUsername();
+
+            if (currentPlayer != null) {
+                System.out.println(
+                        "That color is already taken. "
+                                + "Choose another color or type 'cancel'.");
+                continue;
+            }
+
+            return ChessGame.TeamColor.valueOf(input);
+        }
+    }
+
+    private void displayInitialBoard(
+            ChessGame.TeamColor perspective) {
+
+        ChessBoard board = new ChessBoard();
+        board.resetBoard();
+
+        boardRenderer.drawBoard(board, perspective);
     }
 
     private void displayGames(
